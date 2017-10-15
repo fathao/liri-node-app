@@ -1,13 +1,10 @@
 var Twitter = require('twitter');
 var Spotify = require('node-spotify-api');
 var request = require("request");
+var fs = require("fs");
 var keys = require('./key');
 
-
-var input = process.argv[2];
-
-
-if (input === "my-tweets") {
+function myTweets() {
   var client = new Twitter(keys.twitter);
   var params = {
     screen_name: 'realDonaldTrump',
@@ -28,9 +25,10 @@ if (input === "my-tweets") {
     //   console.log(number, index);
     // });
   });
-} else if (input === "spotify-this-song") {
+}
+
+function spotifyThisSong(songName) {
   var client = new Spotify(keys.spotify); //put in local 
-  var songName = process.argv[3] || 'The Sign';
 
   client.search({
     type: 'track',
@@ -73,23 +71,59 @@ if (input === "my-tweets") {
 
     // console.log(JSON.stringify(data));
   });
-} else if (input === "movie-this") {
+}
+
+function movieThis(movieName) {
+  
   request("http://www.omdbapi.com/?t=" + movieName + "&y=&plot=short&apikey=" + keys.omdb, function (error, response, body) {
 
       // If there were no errors and the response code was 200 (i.e. the request was successful)...
       if (!error && response.statusCode === 200) {
 
         // Then we print out the imdbRating
-        console.log("The movie's rating is: " + JSON.parse(body).imdbRating);
-        var nodeArgs = process.argv;
-        var movieName = "";
-        for (var i = 2; i < nodeArgs.length; i++) {
-          if (i > 2 && i < nodeArgs.length) {
-            movieName = movieName + "+" + nodeArgs[i];
-          } else {
-            movieName += nodeArgs[i];
-          }
-        }
+        var movieData = JSON.parse(body);
+        console.log("The movie name is: " + movieData.Title);
+        console.log("The year released: " + movieData.Year);
+        console.log("IMDB rating: " + movieData.imdbRating);
+        console.log("Rotten tomatoes rating: " + movieData.Ratings[1].Value);
+        console.log("Language: " + movieData.Language);
+        console.log("Plot: " + movieData.Plot);
+        console.log("Actors: " + movieData.Actors);
       }
   });
+}
+
+// --------------------------------------------
+// Main
+// --------------------------------------------
+
+var input = process.argv[2];
+if (input === "my-tweets") {
+  myTweets();
+}
+else if (input === "spotify-this-song") {
+  spotifyThisSong(process.argv[3] || 'The Sign');
+}
+else if (input === "movie-this") {
+  movieThis(process.argv[3] || 'Mr.NoBody');
+}
+else if (input === "do-what-it-says") {
+  fs.readFile("random.txt", "UTF8", function(error, data){
+    if (error) {
+      return console.log(error);
+    }
+
+    var dataArr = data.split(",");
+    var command = dataArr[0];
+    if (command === "my-tweets") {
+      myTweets();
+    }
+    else if (command === "spotify-this-song") {
+      spotifyThisSong(dataArr[1] || 'The Sign');
+    }
+    else if (command === "movie-this") {
+      movieThis(dataArr[1] || 'Mr.NoBody');
+    }
+  })
+
 }
