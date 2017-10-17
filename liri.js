@@ -74,22 +74,21 @@ function spotifyThisSong(songName) {
 }
 
 function movieThis(movieName) {
-  
   request("http://www.omdbapi.com/?t=" + movieName + "&y=&plot=short&apikey=" + keys.omdb, function (error, response, body) {
 
-      // If there were no errors and the response code was 200 (i.e. the request was successful)...
-      if (!error && response.statusCode === 200) {
+    // If there were no errors and the response code was 200 (i.e. the request was successful)...
+    if (!error && response.statusCode === 200) {
 
-        // Then we print out the imdbRating
-        var movieData = JSON.parse(body);
-        console.log("The movie name is: " + movieData.Title);
-        console.log("The year released: " + movieData.Year);
-        console.log("IMDB rating: " + movieData.imdbRating);
-        console.log("Rotten tomatoes rating: " + movieData.Ratings[1].Value);
-        console.log("Language: " + movieData.Language);
-        console.log("Plot: " + movieData.Plot);
-        console.log("Actors: " + movieData.Actors);
-      }
+      // Then we print out the imdbRating
+      var movieData = JSON.parse(body);
+      console.log("The movie name is: " + movieData.Title);
+      console.log("The year released: " + movieData.Year);
+      console.log("IMDB rating: " + movieData.imdbRating);
+      console.log("Rotten tomatoes rating: " + movieData.Ratings[1].Value);
+      console.log("Language: " + movieData.Language);
+      console.log("Plot: " + movieData.Plot);
+      console.log("Actors: " + movieData.Actors);
+    }
   });
 }
 
@@ -97,18 +96,44 @@ function movieThis(movieName) {
 // Main
 // --------------------------------------------
 
-var input = process.argv[2];
+var DEFAULT_MOVIE = 'Mr.NoBody';
+var DEFAULT_SONG = 'The Sign';
+
+function miniPrograms(command, argument) {
+  switch(command) {
+    case "my-tweets":
+      myTweets();
+      break;
+    case "spotify-this-song":
+      spotifyThisSong(argument || DEFAULT_SONG);
+      break;
+    case "movie-this":
+      movieThis(argument || DEFAULT_MOVIE);
+      break;
+    default:
+      console.error("Invalid command");
+  }
+}
+
+var command = process.argv[2];
+var argument = process.argv[3];
+if (command === "do-what-it-says") {
+  var data = fs.readFileSync("random.txt", "UTF8");
+  var dataArr = data.split(",");
+  command = dataArr[0];
+  argument = dataArr[1];
+}
+miniPrograms(command, argument);
+
+/*
 if (input === "my-tweets") {
   myTweets();
-}
-else if (input === "spotify-this-song") {
+} else if (input === "spotify-this-song") {
   spotifyThisSong(process.argv[3] || 'The Sign');
-}
-else if (input === "movie-this") {
+} else if (input === "movie-this") {
   movieThis(process.argv[3] || 'Mr.NoBody');
-}
-else if (input === "do-what-it-says") {
-  fs.readFile("random.txt", "UTF8", function(error, data){
+} else if (input === "do-what-it-says") {
+  fs.readFile("random.txt", "UTF8", function (error, data) {
     if (error) {
       return console.log(error);
     }
@@ -117,13 +142,12 @@ else if (input === "do-what-it-says") {
     var command = dataArr[0];
     if (command === "my-tweets") {
       myTweets();
-    }
-    else if (command === "spotify-this-song") {
+    } else if (command === "spotify-this-song") {
       spotifyThisSong(dataArr[1] || 'The Sign');
-    }
-    else if (command === "movie-this") {
+    } else if (command === "movie-this") {
       movieThis(dataArr[1] || 'Mr.NoBody');
     }
   })
 
 }
+*/
